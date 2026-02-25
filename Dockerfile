@@ -1,5 +1,5 @@
-FROM ubuntu:24.04
+FROM debian:bookworm-slim
 
-RUN apt update && apt install -y git
+RUN apt update && apt install -y git && apt clean
 
 EXPOSE 22
