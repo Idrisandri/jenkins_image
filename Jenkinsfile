@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('PULL') {
             steps {
-                echo 'Pulling base image...'
+                echo 'Pulling base image Ubuntu 24.04...'
                 sh 'docker pull ubuntu:24.04'
             }
         }
@@ -25,33 +25,15 @@ pipeline {
                     echo "SEVERITY,CVE_ID,PACKAGE,VERSION,FIXED_VERSION,DESCRIPTION" > output.csv
 
                     echo "--- CRITICAL ---" >> output.csv
-                    trivy image --severity CRITICAL --format json ${IMAGE_NAME}:${IMAGE_TAG} | \
-                    python3 -c "
-import json,sys
-data=json.load(sys.stdin)
-for r in data.get('Results',[]):
-    for v in r.get('Vulnerabilities',[]):
-        print(f\"CRITICAL,{v.get('VulnerabilityID','')},{v.get('PkgName','')},{v.get('InstalledVersion','')},{v.get('FixedVersion','')},{v.get('Title','').replace(',',';')}\")" >> output.csv
+                    trivy image --severity CRITICAL --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
 
                     echo "--- MEDIUM ---" >> output.csv
-                    trivy image --severity MEDIUM --format json ${IMAGE_NAME}:${IMAGE_TAG} | \
-                    python3 -c "
-import json,sys
-data=json.load(sys.stdin)
-for r in data.get('Results',[]):
-    for v in r.get('Vulnerabilities',[]):
-        print(f\"MEDIUM,{v.get('VulnerabilityID','')},{v.get('PkgName','')},{v.get('InstalledVersion','')},{v.get('FixedVersion','')},{v.get('Title','').replace(',',';')}\")" >> output.csv
+                    trivy image --severity MEDIUM --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
 
                     echo "--- LOW ---" >> output.csv
-                    trivy image --severity LOW --format json ${IMAGE_NAME}:${IMAGE_TAG} | \
-                    python3 -c "
-import json,sys
-data=json.load(sys.stdin)
-for r in data.get('Results',[]):
-    for v in r.get('Vulnerabilities',[]):
-        print(f\"LOW,{v.get('VulnerabilityID','')},{v.get('PkgName','')},{v.get('InstalledVersion','')},{v.get('FixedVersion','')},{v.get('Title','').replace(',',';')}\")" >> output.csv
+                    trivy image --severity LOW --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
 
-                    echo "✅ Scan terminé"
+                    echo "Scan termine"
                     cat output.csv
                 '''
             }
