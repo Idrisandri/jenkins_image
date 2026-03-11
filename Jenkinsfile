@@ -22,15 +22,15 @@ pipeline {
             steps {
                 echo 'Scanning image with Trivy...'
                 sh """
-                    printf 'SEVERITY,CVE_ID,PACKAGE,VERSION,FIXED_VERSION,DESCRIPTION\\n' > output.csv
+                    echo 'SEVERITY,CVE_ID,PACKAGE,VERSION,FIXED_VERSION,DESCRIPTION' > output.csv
 
-                    printf '--- CRITICAL ---\\n' >> output.csv
+                    echo '--- CRITICAL ---' >> output.csv
                     trivy image --severity CRITICAL --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
 
-                    printf '--- MEDIUM ---\\n' >> output.csv
+                    echo '--- MEDIUM ---' >> output.csv
                     trivy image --severity MEDIUM --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
 
-                    printf '--- LOW ---\\n' >> output.csv
+                    echo '--- LOW ---' >> output.csv
                     trivy image --severity LOW --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
 
                     echo 'Scan termine'
