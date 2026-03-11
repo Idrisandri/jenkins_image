@@ -21,17 +21,21 @@ pipeline {
         stage('TRIVY SCAN') {
             steps {
                 echo 'Scanning image with Trivy...'
-                sh '''#!/bin/bash
-                    echo "SEVERITY,CVE_ID,PACKAGE,VERSION,FIXED_VERSION,DESCRIPTION" > output.csv
-                    echo "--- CRITICAL ---" >> output.csv
+                sh """
+                    printf 'SEVERITY,CVE_ID,PACKAGE,VERSION,FIXED_VERSION,DESCRIPTION\\n' > output.csv
+
+                    printf '--- CRITICAL ---\\n' >> output.csv
                     trivy image --severity CRITICAL --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
-                    echo "--- MEDIUM ---" >> output.csv
+
+                    printf '--- MEDIUM ---\\n' >> output.csv
                     trivy image --severity MEDIUM --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
-                    echo "--- LOW ---" >> output.csv
+
+                    printf '--- LOW ---\\n' >> output.csv
                     trivy image --severity LOW --format table ${IMAGE_NAME}:${IMAGE_TAG} >> output.csv 2>&1 || true
-                    echo "Scan termine"
+
+                    echo 'Scan termine'
                     cat output.csv
-                '''
+                """
             }
         }
         stage('PUSH') {
